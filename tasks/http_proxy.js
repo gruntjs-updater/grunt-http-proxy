@@ -13,38 +13,31 @@ module.exports = function(grunt) {
   // Please see the Grunt documentation for more information regarding task
   // creation: http://gruntjs.com/creating-tasks
 
-  grunt.registerMultiTask('http_proxy', 'Grunt plugin for http proxy server.', function() {
-    // Merge task-specific and/or target-specific options with these defaults.
-    var options = this.options({
-      punctuation: '.',
-      separator: ', '
-    });
+  grunt.registerMultiTask('http_proxy', 'http proxy server that can serve local content as well redirect to a remote server for http requests.', function() {
+      "use strict";
 
-    // Iterate over all specified file groups.
-    this.files.forEach(function(f) {
-      // Concat specified files.
-      var src = f.src.filter(function(filepath) {
-        // Warn on and remove invalid source files (if nonull was set).
-        if (!grunt.file.exists(filepath)) {
-          grunt.log.warn('Source file "' + filepath + '" not found.');
-          return false;
-        } else {
-          return true;
-        }
-      }).map(function(filepath) {
-        // Read file source.
-        return grunt.file.read(filepath);
-      }).join(grunt.util.normalizelf(options.separator));
+      //read any js and css files
 
-      // Handle options.
-      src += options.punctuation;
+      //compile less files to css
 
-      // Write the destination file.
-      grunt.file.write(f.dest, src);
+      var http = require('http-server'),
+          httpProxy = require('http-proxy'),
+          options = {
+              router: {
+              }
+          };
 
-      // Print a success message.
-      grunt.log.writeln('File "' + f.dest + '" created.');
-    });
+      options.router['localhost/' + forwardPath] = this.options.forwardHost + "/" + this.options.forwardPath;
+      options.router.localhost = 'localhost:' + this.options.localPort;
+
+      //
+      // Create your proxy server
+      //
+      httpProxy.createServer(options).listen(this.options.proxyPort);
+
+      //
+      // Create your target server
+      //
+      http.createServer().listen(this.options.localPort);
   });
-
 };
