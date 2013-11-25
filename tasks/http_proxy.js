@@ -8,35 +8,68 @@
 
 'use strict';
 
-module.exports = function(grunt) {
+module.exports = function (grunt) {
 
-  // Please see the Grunt documentation for more information regarding task
-  // creation: http://gruntjs.com/creating-tasks
+    // Please see the Grunt documentation for more information regarding task
+    // creation: http://gruntjs.com/creating-tasks
 
-  grunt.registerMultiTask('http_proxy', 'http proxy server that can serve local content as well redirect to a remote server for http requests.', function() {
+    grunt.registerMultiTask('http_proxy', 'http proxy server that can serve local content as well redirect to a remote server for http requests.', function () {
 
-      //read any js and css files
+        //read any js and css files
 
-      //compile less files to css
+        //compile less files to css
 
-      var http = require('http-server'),
-          httpProxy = require('http-proxy'),
-          options = {
-              router: {
-              }
-          };
+        var http = require('http-server'),
+            httpProxy = require('http-proxy'),
+            proxy,
+            server,
+            options = {
+                router: {
+                }
+            },
+            taskTarget = this.target,
+            proxyPort = this.options.proxyPort,
+            localPort = this.options.localPort;
 
-      options.router['localhost/' + this.options.forwardPath] = this.options.forwardHost + "/" + this.options.forwardPath;
-      options.router.localhost = 'localhost:' + this.options.localPort;
+        options.router['localhost/' + this.options.forwardPath] = this.options.forwardHost + "/" + this.options.forwardPath;
+        options.router.localhost = 'localhost:' + proxyPort;
 
-      //
-      // Create your proxy server
-      //
-      httpProxy.createServer(options).listen(this.options.proxyPort);
+        //
+        // Create your proxy server
+        //
+        proxy = httpProxy.createServer(options).listen(proxyPort).on('listening', function () {
 
-      //
-      // Create your target server
-      //
-      http.createServer().listen(this.options.localPort);
-  });
+            grunt.log.writeln('Started proxy web server on localhost:' + proxyPort + '.');
+
+
+            grunt.event.emit('http proxy' + taskTarget + '.listening on localhost' + proxyPort);
+
+        })
+            .on('error', function (err) {
+                if (err.code === 'EADDRINUSE') {
+                    grunt.fatal('Port ' + proxyPort + ' is already in use by another process.');
+                } else {
+                    grunt.fatal(err);
+                }
+            });
+
+        //
+        // Create your target server
+        //
+        http.createServer().listen(localPort).on('listening', function () {
+
+            grunt.log.writeln('Started web server on localhost:' + localPort + '.');
+
+
+            grunt.event.emit('http proxy ' + taskTarget + '.listening on localhost' + localPort);
+
+        })
+            .on('error', function (err) {
+                if (err.code === 'EADDRINUSE') {
+                    grunt.fatal('Port ' + localPort + ' is already in use by another process.');
+                } else {
+                    grunt.fatal(err);
+                }
+            });;
+    });
 };
