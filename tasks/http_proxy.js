@@ -15,10 +15,6 @@ module.exports = function (grunt) {
 
     grunt.registerMultiTask('http_proxy', 'http proxy server that can serve local content as well redirect to a remote server for http requests.', function () {
 
-        //read any js and css files
-
-        //compile less files to css
-
         var http = require('http-server'),
             httpProxy = require('http-proxy'),
             proxy,
@@ -29,7 +25,8 @@ module.exports = function (grunt) {
             },
             taskTarget = this.target,
             proxyPort = this.options.proxyPort,
-            localPort = this.options.localPort;
+            localPort = this.options.localPort,
+            done = this.async();
 
         options.router['localhost/' + this.options.forwardPath] = this.options.forwardHost + "/" + this.options.forwardPath;
         options.router.localhost = 'localhost:' + proxyPort;
