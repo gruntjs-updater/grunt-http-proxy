@@ -32,11 +32,11 @@
     "grunt-contrib-clean": "~0.4.0",
     "grunt-contrib-nodeunit": "~0.2.0",
     "grunt": "~0.4.2",
-    "http-server":"*",
-    "http-proxy" : "*"
+    "http-server": "*",
+    "http-proxy": "*"
   },
   "peerDependencies": {
-    "grunt": "~0.4.2"
+    "grunt": ">=0.4.0"
   },
   "keywords": [
     "gruntplugin"
